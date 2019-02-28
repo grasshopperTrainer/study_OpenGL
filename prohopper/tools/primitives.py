@@ -179,9 +179,9 @@ class Tlist(Primitive):
         #     return input
 
         if all([not isinstance(i,(list,tuple)) for i in input]):
-            referenced = {}
-            for index,value in enumerate(input):
-                referenced[str(index)] = value
+            referenced = []
+            for i in input:
+                referenced.append(Item(i))
             return referenced
 
         else:
@@ -211,32 +211,32 @@ class Tlist(Primitive):
                     parsed.append(i)
             return parsed
 
-    def _parslist(self, input: list):
-
-        parsed = {}
-        if all([not isinstance(i, (list, tuple, Tlist)) for i in input]):
-            for index, value in enumerate(input):
-                parsed[str(index)] = value
-        else:
-            count = 0
-            for i in input:
-                if isinstance(i,(list,tuple)):
-                    child = self._parslist(i)
-                    new = {f'{count},'+i:child[i] for i in child}
-                    parsed.update(new)
-                elif isinstance(i, Tlist):
-                    child = i.get_data()
-                    new = {f'{count},' + i:child[i] for i in child}
-                    parsed.update(new)
-                else:
-                    self._printmessage('input type incorrect')
-                    return None
-                count += 1
-        return parsed
+    # def _parslist(self, input: list):
+    #
+    #     parsed = {}
+    #     if all([not isinstance(i, (list, tuple, Tlist)) for i in input]):
+    #         for index, value in enumerate(input):
+    #             parsed[str(index)] = value
+    #     else:
+    #         count = 0
+    #         for i in input:
+    #             if isinstance(i,(list,tuple)):
+    #                 child = self._parslist(i)
+    #                 new = {f'{count},'+i:child[i] for i in child}
+    #                 parsed.update(new)
+    #             elif isinstance(i, Tlist):
+    #                 child = i.get_data()
+    #                 new = {f'{count},' + i:child[i] for i in child}
+    #                 parsed.update(new)
+    #             else:
+    #                 self._printmessage('input type incorrect')
+    #                 return None
+    #             count += 1
+    #     return parsed
 
 
     def _checkifleaf(self):
-        a =  all([isinstance(i,Item) for i in self.get_data()]) and len(self.get_data()) is not 0
+        a = all([isinstance(i, Item) for i in self.get_data()]) and len(self.get_data()) is not 0
         self._isleaf = a
 
     def calculate(self):
@@ -359,69 +359,6 @@ class Tlist(Primitive):
     def isleaf(self):
         return self._isleaf
 
-    # def print_data(self, _count = 0):
-    #     lu = u'\u2554'
-    #     ru = u'\u2557'
-    #     ld = u'\u255a'
-    #     rd = u'\u255d'
-    #     vr = u'\u2551'
-    #     hr = u'\u2550'
-    #
-    #     if self.isleaf():
-    #         listlen = len(self.get_data())
-    #         types = []
-    #         texts = []
-    #         lentypes = []
-    #         lentexts = []
-    #         for i in self.get_data():
-    #             types.append(str(i.type().__name__))
-    #             if isinstance(i,Geometry):
-    #                 texts.append(i.__str__(True))
-    #             else:
-    #                 texts.append(str(i))
-    #             lentypes.append(len(str(type(i))))
-    #             lentexts.append(len(str(i)))
-    #
-    #         max_lentype = max(lentypes)
-    #         max_lentext = max(lentexts)
-    #
-    #         types = [j + ' '*(max_lentype - lentypes[i]) for i,j in enumerate(types)]
-    #         texts = [j + ' '*(max_lentext - lentexts[i]) for i,j in enumerate(texts)]
-    #         lines = [vr + i + ':' + j + vr for i,j in zip(types,texts)]
-    #         top = lu + hr*(len(lines[0])-2) + ru
-    #         bottom = ld + hr*(len(lines[0])-2) + rd
-    #         lines.insert(0,top)
-    #         lines.append(bottom)
-    #
-    #         if _count is 0:
-    #             for i in lines:
-    #                 print(i)
-    #         else:
-    #             return lines
-    #     else:
-    #         blocklines = []
-    #         blocklen = []
-    #         for i in self._data:
-    #             data = i.print_data(_count = _count +1)
-    #             blocklines += data
-    #             blocklen.append(len(data[0]))
-    #         max_blocklen = max(blocklen)
-    #
-    #         for i in range(len(blocklines)):
-    #             line = blocklines[i]
-    #             blocklines[i] = vr + line + ' '*(max_blocklen - len(line)) + vr
-    #
-    #         top = lu + hr*(max_blocklen) + ru
-    #         bottom = ld + hr*(max_blocklen) + rd
-    #         blocklines.insert(0,top)
-    #         blocklines.append(bottom)
-    #
-    #         if _count is 0:
-    #             for i in blocklines:
-    #                 print(i)
-    #         else:
-    #             return blocklines
-
     def print_data(self, _count=0):
         lu = u'\u2554'
         ru = u'\u2557'
@@ -430,121 +367,61 @@ class Tlist(Primitive):
         vr = u'\u2551'
         hr = u'\u2550'
 
-        te = [str(i) for i in self.get_data().values()]
-        ty = [i.__class__.__name__ for i in self.get_data().values()]
+        if self.isleaf():
+            listlen = len(self.get_data())
+            types = []
+            texts = []
+            lentypes = []
+            lentexts = []
+            for i in self.get_data():
+                types.append(str(i.type().__name__))
+                if isinstance(i, Geometry):
+                    texts.append(i.__str__(True))
+                else:
+                    texts.append(str(i))
+                lentypes.append(len(str(type(i))))
+                lentexts.append(len(str(i)))
 
-        tylong = max([len(i) for i in ty])
-        telong = max([len(i) for i in te])
-        lines = [' '*(tylong - len(ty))+f'{ty} : {te}' + ' '*(telong - len(te)) for ty, te in zip(ty,te)]
-        linelen = tylong + telong + 3
+            max_lentype = max(lentypes)
+            max_lentext = max(lentexts)
 
-        indexinfo = self._parse_strindex()
-        depth = max([len(i) for i in indexinfo])
-        formated = []
+            types = [j + ' ' * (max_lentype - lentypes[i]) for i, j in enumerate(types)]
+            texts = [j + ' ' * (max_lentext - lentexts[i]) for i, j in enumerate(texts)]
+            lines = [vr + i + ':' + j + vr for i, j in zip(types, texts)]
+            top = lu + hr * (len(lines[0]) - 2) + ru
+            bottom = ld + hr * (len(lines[0]) - 2) + rd
+            lines.insert(0, top)
+            lines.append(bottom)
 
-        for i,v in enumerate(lines):
-            indexcurr = indexinfo[i]
-            try:
-                indexnext = indexinfo[i+1]
-            except:
-                indexnext = None
-            dimension = len(indexcurr)
-            adon = vr*dimension +' '*(depth-dimension)
-            line = adon + v + adon[::-1]
-            formated.append(line)
-
-            # three cases for writing body
-            if indexnext is None:
-                continue
-            elif len(indexcurr) is len(indexnext):
-                # need to check where split appears
-                mark = 0
-                for i in range(-2,-(len(indexcurr)+1),-1):
-                    if indexcurr[i] is not indexnext[i]:
-                        mark = -i-1
-
-                # now i know where to split
-                ups = []
-                downs = []
-                # write seperation...
-                val = len(indexcurr)
-                for i in range(mark):
-                    outnum = len(indexcurr)-1-i
-                    innum = depth - outnum -1
-
-                    front = vr*outnum + ld + hr*innum
-                    middle = linelen*hr
-                    back = hr*innum + rd + vr*outnum
-                    ups.append(f'{front}{middle}{back}')
-
-                    front = vr * outnum + lu + hr * innum
-                    middle = linelen * hr
-                    back = hr * innum + ru + vr * outnum
-                    downs.append(f'{front}{middle}{back}')
-                # print('...')
-                # for i in ups:
-                #     print('ups',i)
-                # print('...')
-                # for i in downs:
-                #     print('downs',i)
-                #     print(indexcurr, indexnext)
-                seperation = ups + downs[::-1]
-                formated += seperation
-
+            if _count is 0:
+                for i in lines:
+                    print(i)
             else:
-                ups = []
-                downs = []
+                return lines
+        else:
+            blocklines = []
+            blocklen = []
+            print(self._data)
+            for i in self._data:
+                data = i.print_data(_count=_count + 1)
+                blocklines += data
+                blocklen.append(len(data[0]))
+            max_blocklen = max(blocklen)
 
-                for i in range(len(indexcurr)-1):
+            for i in range(len(blocklines)):
+                line = blocklines[i]
+                blocklines[i] = vr + line + ' ' * (max_blocklen - len(line)) + vr
 
-                    front = vr*(i+1) + ld + hr*(depth - (i+2))
-                    middle = linelen*hr
-                    back =hr*(depth - (i+2)) + rd + vr*(i+1)
-                    ups.append(f'{front}{middle}{back}')
+            top = lu + hr * (max_blocklen) + ru
+            bottom = ld + hr * (max_blocklen) + rd
+            blocklines.insert(0, top)
+            blocklines.append(bottom)
 
-                for i in range(len(indexnext)-1):
-
-                    front = vr * (i+1) + lu + hr * (depth - (i+2))
-                    middle = linelen * hr
-                    back = hr * (depth - (i+2)) + ru + vr * (i+1)
-                    downs.append(f'{front}{middle}{back}')
-                    # print('xxx'f'{front}{middle}{back}')
-
-                seperation = ups[::-1]
-                seperation += downs
-                # print('...')
-                # for i in ups[::-1]:
-                #     print('ups',i)
-                # print('...')
-                # for i in downs:
-                #     print('downs',i)
-                # formated += seperation
-                # print('...')
-                # for i in seperation:
-                #     print(i)
-                # print('...')
-                formated += seperation
-
-        #cap top and bottom
-        top = []
-        bottom = []
-        info = indexinfo[0]
-        for i in range(len(info)):
-            front = vr * (i) + lu + hr * (depth - (i + 1))
-            middle = linelen * hr
-            back = hr * (depth - (i + 1)) + ru + vr * (i)
-            top.append(f'{front}{middle}{back}')
-        info = indexinfo[-1]
-        for i in range(len(info)):
-            front = vr * (i) + ld + hr * (depth - (i + 1))
-            middle = linelen * hr
-            back = hr * (depth - (i + 1)) + rd + vr * (i)
-            bottom.append(f'{front}{middle}{back}')
-
-        formated = top + formated + bottom[::-1]
-
-        for i in formated:
-            print(i)
+            if _count is 0:
+                for i in blocklines:
+                    print(i)
+            else:
+                return blocklines
 
 
     def _parse_strindex(self):
