@@ -108,7 +108,7 @@ class Item:
         self._data = data
 
     def __str__(self):
-        return 'i'+str(self._data)
+        return str(self._data)
 
     def __repr__(self):
         return self.__str__()
@@ -178,10 +178,13 @@ class Tlist(Primitive):
         # if all([isinstance(i,Item) for i in input]):
         #     return input
 
-        if all([not isinstance(i,(list,tuple)) for i in input]):
+        if all([not isinstance(i, (list, tuple, Tlist)) for i in input]):
             referenced = []
             for i in input:
-                referenced.append(Item(i))
+                if isinstance(i, Item):
+                    referenced.append(i)
+                else:
+                    referenced.append(Item(i))
             return referenced
 
         else:
@@ -210,29 +213,6 @@ class Tlist(Primitive):
                     i._checkifleaf()
                     parsed.append(i)
             return parsed
-
-    # def _parslist(self, input: list):
-    #
-    #     parsed = {}
-    #     if all([not isinstance(i, (list, tuple, Tlist)) for i in input]):
-    #         for index, value in enumerate(input):
-    #             parsed[str(index)] = value
-    #     else:
-    #         count = 0
-    #         for i in input:
-    #             if isinstance(i,(list,tuple)):
-    #                 child = self._parslist(i)
-    #                 new = {f'{count},'+i:child[i] for i in child}
-    #                 parsed.update(new)
-    #             elif isinstance(i, Tlist):
-    #                 child = i.get_data()
-    #                 new = {f'{count},' + i:child[i] for i in child}
-    #                 parsed.update(new)
-    #             else:
-    #                 self._printmessage('input type incorrect')
-    #                 return None
-    #             count += 1
-    #     return parsed
 
 
     def _checkifleaf(self):
@@ -345,13 +325,6 @@ class Tlist(Primitive):
         except:
             self._printmessage('probably index out of bound')
 
-    # def wrap(self,times:int = 1, _count= 1):
-    #     if times is _count:
-    #         newtlist = copy.Tlist()
-    #         print(id(self))
-    #
-    #     else:
-    #         pass
 
     def set_data(self,data):
         self._data = data
@@ -367,6 +340,7 @@ class Tlist(Primitive):
         vr = u'\u2551'
         hr = u'\u2550'
 
+        # base condition
         if self.isleaf():
             listlen = len(self.get_data())
             types = []
@@ -375,16 +349,13 @@ class Tlist(Primitive):
             lentexts = []
             for i in self.get_data():
                 types.append(str(i.type().__name__))
-                if isinstance(i, Geometry):
-                    texts.append(i.__str__(True))
-                else:
-                    texts.append(str(i))
-                lentypes.append(len(str(type(i))))
+                texts.append(str(i))
+                lentypes.append(len(str(i.type())))
                 lentexts.append(len(str(i)))
 
             max_lentype = max(lentypes)
             max_lentext = max(lentexts)
-
+            # format to match length of text line
             types = [j + ' ' * (max_lentype - lentypes[i]) for i, j in enumerate(types)]
             texts = [j + ' ' * (max_lentext - lentexts[i]) for i, j in enumerate(texts)]
             lines = [vr + i + ':' + j + vr for i, j in zip(types, texts)]
@@ -393,30 +364,38 @@ class Tlist(Primitive):
             lines.insert(0, top)
             lines.append(bottom)
 
+
             if _count is 0:
                 for i in lines:
                     print(i)
             else:
                 return lines
+
+        # recursion
         else:
             blocklines = []
             blocklen = []
-            print(self._data)
             for i in self._data:
                 data = i.print_data(_count=_count + 1)
                 blocklines += data
                 blocklen.append(len(data[0]))
             max_blocklen = max(blocklen)
 
+            # wrap for parent dimension
             for i in range(len(blocklines)):
                 line = blocklines[i]
-                blocklines[i] = vr + line + ' ' * (max_blocklen - len(line)) + vr
-
+                # format style: match position of dimension closure
+                if line[0] == vr:
+                    blocklines[i] = vr + line[0] + line[1:-1].center(max_blocklen - 2) + line[-1] + vr
+                else:
+                    blocklines[i] = vr + line[0] + line[1:-1].center(max_blocklen - 2, hr) + line[-1] + vr
+            # enclose blocks
             top = lu + hr * (max_blocklen) + ru
             bottom = ld + hr * (max_blocklen) + rd
             blocklines.insert(0, top)
             blocklines.append(bottom)
 
+            # when recursion is over print
             if _count is 0:
                 for i in blocklines:
                     print(i)
@@ -453,8 +432,8 @@ class Point(Geometry):
         if dataonly:
             return f'{arr.T[0,:3]}'
         else:
-            return f'{self.__class__.__name__} : {arr.T[0,:3]}'
+            return f'P{arr.T[0, :3]}'
 
     def __repr__(self):
         t = self.__str__()
-        return t
+        return self._data
