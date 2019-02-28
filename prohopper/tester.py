@@ -1,7 +1,7 @@
 import numpy as np
 from tools import *
 
-# a = Point(0,0,0)
+a = Point(0, 0, 0)
 # v = Vector(1,2,0)
 
 # k = Alist(a,a)
@@ -17,8 +17,10 @@ from tools import *
 # print(l)
 print('...')
 zero = Tlist([9,9])
-first = Tlist([[2.3,3],[[0,0],[[[0],[0]],[zero]]],[0,0]])
+first = Tlist([[a], [[0, 0], [[[0], [0]], [zero]]], [0, 0]])
 second = Tlist([1,2,3])
+print(a)
+print(a.__repr__())
 # print(zero)
 # print(first)
 # first.print_data()
@@ -27,9 +29,8 @@ second = Tlist([1,2,3])
 # print(first)
 # print(first.isleaf())
 # first.print_data()
-zero.print_data()
 first.print_data()
-second.print_data()
+print(first)
 print('...')
 # second = Tlist([first,[first],[[0],[0]]])
 # second.print_data()
