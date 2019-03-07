@@ -1,5 +1,5 @@
 from glumpy import app
-import doodler as do
+from doodler import Doodler
 
 class Screen:
     WINDOWS = {}
@@ -7,7 +7,7 @@ class Screen:
     @classmethod
     def __init__(cls):
         # inithialization of doodler
-        cls.doo = do.Doodler()
+        # cls.doo = do.Doodler()
         cls._framerate = 60
         print('___ Screen initialized')
         pass
@@ -52,8 +52,9 @@ class Screen:
             def on_draw(dt):
                 # push window into doodler
                 # so Doodler function could retrive Window info
-                do.Doodler.push_window(window)
+                Doodler.push_window(window)
                 window.clear()
+
                 func(dt)
 
             return on_draw

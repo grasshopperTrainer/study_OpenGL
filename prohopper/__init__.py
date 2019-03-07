@@ -1,8 +1,10 @@
 from prohopper.screen import Screen
-from prohopper.doodler import Doodler
+from doodler import Doodler
+def thisisinit():
+    print('thisisinit')
+
 
 print('prohopper init')
+draw = Doodler()
 
-def thisisinit():
-    pass
-
+# point = doo.point
